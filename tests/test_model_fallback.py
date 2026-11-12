@@ -1,10 +1,9 @@
-import pytest
-import os
-import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
 from app.conversation import ConversationManager
-from app.notion_client import NotionOpusAPI, NotionUpstreamError
+from app.notion_client import NotionOpusAPI
 from ask_notion import resolve_model
+
 
 def test_resolve_model_defaults_to_auto():
     assert resolve_model("") == "auto"

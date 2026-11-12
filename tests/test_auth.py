@@ -1,9 +1,10 @@
-import pytest
-import os
-import json
 from unittest.mock import patch
-from app.config import load_accounts, get_default_account
+
+import pytest
+
+from app.config import get_default_account, load_accounts
 from ask_notion import show_auth_status
+
 
 def test_load_accounts_empty(tmp_path, monkeypatch):
     monkeypatch.setenv("NOTION_ACCOUNTS", "")
