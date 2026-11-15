@@ -783,6 +783,10 @@ def parse_stream(response: requests.Response) -> Generator[dict[str, Any], None,
         except json.JSONDecodeError:
             continue
 
+        # Skip non-object frames (null, arrays, numbers, etc.) that cannot support .get()
+        if not isinstance(data, dict):
+            continue
+
         data_type = str(data.get("type", "") or "").lower()
 
         if data_type == "record-map":
