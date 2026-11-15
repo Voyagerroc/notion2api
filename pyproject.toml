@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+# The suite imports the `app` package from the repository root. `python -m
+# pytest` puts the current directory on sys.path, but the plain `pytest`
+# entry point used by CI does not, so collection failed with
+# "ModuleNotFoundError: No module named 'app'" on clean runners.
+pythonpath = ["."]
+testpaths = ["tests"]

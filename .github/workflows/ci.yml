@@ -32,5 +32,9 @@ jobs:
           ruff check tests/
 
       - name: Run Pytest
+        env:
+          # A synthetic account pool so `app` startup does not depend on a real
+          # Notion session. The suite mocks every upstream call.
+          NOTION_ACCOUNTS: '[{"profile_name":"default","token_v2":"synthetic","space_id":"00000000000000000000000000000000","user_id":"00000000-0000-0000-0000-000000000000","space_view_id":"00000000-0000-0000-0000-000000000000","user_name":"tester","user_email":"tester@example.invalid"}]'
         run: |
           pytest tests/ -v
