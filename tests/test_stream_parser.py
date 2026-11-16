@@ -1,8 +1,5 @@
 import json
-from typing import Any, Iterator, Union
-from unittest.mock import MagicMock
-
-import pytest
+from collections.abc import Iterator
 
 from app.stream_parser import parse_stream
 
@@ -10,10 +7,10 @@ from app.stream_parser import parse_stream
 class FakeResponse:
     """Minimal stand-in for requests.Response that supports iter_lines()."""
 
-    def __init__(self, lines: list[Union[str, bytes]]):
+    def __init__(self, lines: list[str | bytes]):
         self._lines = lines
 
-    def iter_lines(self) -> Iterator[Union[str, bytes]]:
+    def iter_lines(self) -> Iterator[str | bytes]:
         yield from self._lines
 
 
@@ -24,7 +21,7 @@ def test_parse_stream_skips_non_object_and_malformed_frames():
         "null",
         "[]",
         "42",
-        ""just a string"",
+        '"just a string"',
         "true",
         "{not valid json",
         json.dumps({"type": "markdown-chat", "value": "Hello from markdown"}),
@@ -47,8 +44,8 @@ def test_parse_stream_skips_non_object_and_malformed_frames():
     final_contents = [e for e in events if e.get("type") == "final_content"]
     assert any("Hello from markdown" in e.get("text", "") for e in final_contents)
 
-    # The stream completed without exception
-    assert len(events) >= 1
+    # The later patch event must also survive the invalid frames.
+    assert {"type": "content", "text": "patch text"} in events
 
 
 def test_parse_stream_handles_bytes_and_str_lines():
