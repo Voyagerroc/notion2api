@@ -1,3 +1,46 @@
+[build-system]
+requires = ["setuptools>=77,<82"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "notion2api"
+version = "0.1.0"
+description = "Experimental local CLI and OpenAI-compatible bridge for Notion AI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "ruff>=0.16,<0.17", "build>=1,<2"]
+
+[project.scripts]
+notion-ai = "ask_notion:main"
+voyager-relay = "ask_notion:main"
+notion-ai-server = "app.cli:server_main"
+
+[tool.setuptools]
+py-modules = ["ask_notion", "login", "main"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+include = ["app*", "frontend*"]
+
+[tool.setuptools.package-data]
+frontend = ["*.html", "css/*.css", "js/**/*.js"]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# These legacy launchers put the checkout on sys.path before app imports.
+"main.py" = ["E402"]
+
 [tool.pytest.ini_options]
 # The suite imports the `app` package from the repository root. `python -m
 # pytest` puts the current directory on sys.path, but the plain `pytest`

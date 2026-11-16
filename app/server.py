@@ -21,13 +21,10 @@ async def lifespan(app: FastAPI):
 
     # 确定运行模式
     if is_lite_mode():
-        mode = "lite"
         logger.info("Service starting up in LITE mode", extra={"request_info": {"event": "startup", "accounts": len(ACCOUNTS), "mode": "lite"}})
     elif is_standard_mode():
-        mode = "standard"
         logger.info("Service starting up in STANDARD mode", extra={"request_info": {"event": "startup", "accounts": len(ACCOUNTS), "mode": "standard"}})
     else:
-        mode = "heavy"
         app.state.conversation_manager = ConversationManager()
         logger.info("Service starting up in HEAVY mode", extra={"request_info": {"event": "startup", "accounts": len(ACCOUNTS), "mode": "heavy"}})
 

@@ -20,6 +20,7 @@ from urllib.request import urlopen
 
 import requests
 from websocket import create_connection
+from app.paths import state_dir
 
 # 与 app/notion_client.py 一致：支持区域镜像 / 反代，默认官方站点
 NOTION_URL = os.getenv("NOTION_URL", "https://www.notion.so").rstrip("/")
@@ -36,8 +37,8 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
 )
-ACCOUNTS_FILE = Path(__file__).resolve().parent / "accounts.json"
-ENV_FILE = Path(__file__).resolve().parent / ".env"
+ACCOUNTS_FILE = state_dir() / "accounts.json"
+ENV_FILE = state_dir() / ".env"
 DEFAULT_PROFILE = "default"
 DEFAULT_DEBUG_PORT = 9222
 DEFAULT_LOGIN_TIMEOUT = 300
@@ -89,14 +90,17 @@ def _open_login_page() -> None:
 
 def _prompt_token() -> str:
     import getpass
+    import warnings
     print()
     print("Step 1: Sign in to Notion in the browser window.")
     print("Step 2: Copy your token_v2 value from the Notion cookie store.")
     print("Step 3: Paste it below (input will be masked for security).")
     try:
-        token = getpass.getpass("\nPaste token_v2: ").strip()
-    except Exception:
-        token = input("\nPaste token_v2: ").strip()
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", getpass.GetPassWarning)
+            token = getpass.getpass("\nPaste token_v2: ").strip()
+    except Exception as exc:
+        raise RuntimeError("Masked input unavailable; use an interactive local terminal") from exc
     if not token:
         raise ValueError("token_v2 is required")
     return token
@@ -549,11 +553,13 @@ def _write_accounts(account: NotionAccount) -> list[dict[str, Any]]:
         merged.append(item)
 
     merged.insert(0, account.to_dict())
+    ACCOUNTS_FILE.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     ACCOUNTS_FILE.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return merged
 
 
 def _sync_env_file(accounts: list[dict[str, Any]]) -> None:
+    ENV_FILE.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     env_line = f"NOTION_ACCOUNTS={json.dumps(accounts, ensure_ascii=False)}"
 
     if ENV_FILE.exists():
