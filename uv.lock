@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -732,7 +732,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.31.0,<3.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.16,<0.18" },
     { name = "slowapi", specifier = ">=0.1.9,<1.0.0" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.22.0,<1.0.0" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0,<1.0.0" },
     { name = "websocket-client", specifier = ">=1.6.0,<2.0.0" },
 ]
 provides-extras = ["dev"]
