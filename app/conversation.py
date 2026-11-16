@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional
 
 from app.logger import logger
 from app.model_registry import get_thread_type, is_gemini_model
+from app.paths import state_dir
 
 
 class ConversationManager:
@@ -19,11 +20,7 @@ class ConversationManager:
     ASSISTANT_EMPTY_PLACEHOLDER = "[assistant_no_visible_content]"
 
     def __init__(self):
-        default_db = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "data",
-            "conversations.db",
-        )
+        default_db = str(state_dir() / "data" / "conversations.db")
         self.db_path = os.getenv("DB_PATH", default_db)
         os.makedirs(os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True)
         self._init_db()

@@ -11,7 +11,7 @@
 
 ## 🌟 Overview / Genel Bakış
 
-**Notion2API** bridges the Notion AI Web API into two production-grade workflows:
+**Notion2API** bridges the Notion AI Web API into two experimental local workflows:
 1. **Autonomous Terminal AI Agent (`ask_notion.py` / `notion-ai`)**: A full-featured terminal development companion equipped with a ReAct tool-calling loop, an AST-validated safe code patcher with instant rollback, a background SQLite task queue with worker leasing, and direct Notion workspace publishing.
 2. **Local OpenAI-Compatible API Server (`app.server:app`)**: Exposes standard `/v1/chat/completions` endpoints for Cursor, Cline, Cherry Studio, Zotero, or any custom LLM client with streaming (SSE), thinking traces, and live web search visibility.
 
@@ -26,7 +26,7 @@
 
 ### 2. 🛡️ Safe AST Code Patcher & Rollback (`-e` / `--rollback`)
 - Atomic writes via `.tmp` file syncing before swap (`os.replace`).
-- Python syntax tree verification (`ast.parse`) prevents broken code from touching disk.
+- Python syntax tree verification (`ast.parse`) checks Python syntax before replacement; it does not prove semantic correctness or provide an OS sandbox.
 - Automatic SHA-256 validated `.bak` creation with color-coded diff review (`[e/H]` confirmation).
 - 1-command rollback: `notion-ai --rollback target.py`.
 
@@ -40,7 +40,7 @@
 - Native markdown conversion and headless CLI sync.
 
 ### 5. 🌐 Local OpenAI-Compatible Server
-- 34+ AI models supported: Claude 3.5 Sonnet, Claude Opus, GPT-4o, Gemini 1.5, DeepSeek, and Auto.
+- Model aliases are listed by `notion-ai --list-models`; this is a local mapping, not verification of current account access or provider availability.
 - Multi-account pooling with round-robin rotation and cooldown handling.
 - Streaming reasoning (`thinking`) and live web search traces.
 
@@ -62,21 +62,38 @@ python -m venv venv
 # Linux/macOS:
 source venv/bin/activate
 
-pip install -r requirements.txt
+python -m pip install -e .
 ```
 
 ### 3. Setup Credentials / Notion Girişi Yapın
 Run the automated login script to capture your active Notion session:
 ```bash
-python login.py
+voyager-relay login
 ```
-*Alternatively, copy `.env.example` to `.env` and fill in `NOTION_ACCOUNTS` manually.*
+Use your own eligible Notion account and enter credentials only in the local masked login flow. Never paste tokens into agent chat. This unofficial integration is subject to provider terms, plans and quotas; no free inference or model availability is guaranteed.
 
 ---
 
 ## 💻 CLI Usage Guide / Terminal Kullanım Kılavuzu
 
-You can run `python ask_notion.py` directly, or link it globally as `notion-ai`:
+The editable install creates **both** `notion-ai` and `voyager-relay`, plus `notion-ai-server`. While the virtual environment is activated, these commands work from any directory; no copied `.cmd` wrappers or shell aliases are needed. Existing `python ask_notion.py` usage remains supported.
+
+```console
+notion-ai --help
+voyager-relay --help
+notion-ai-server --help
+```
+
+These help commands are offline and do not read credentials or create state. To install commands in a persistent user tool environment instead, run `uv tool install --editable .` from the checkout and add the path reported by `uv tool dir --bin` to your PATH. No shell profile is modified by this project.
+
+For a reproducible development environment, install uv 0.12.5 and use `uv sync --locked --extra dev`; run commands with `uv run --locked --extra dev`. `uv.lock` pins the resolved dependency graph with platform/Python markers. A plain pip editable install uses the declared ranges rather than the lock.
+
+### Local state and compatibility
+
+A source/editable checkout keeps its existing `.env`, `accounts.json` and `data/` locations. A wheel installation stores state below `%LOCALAPPDATA%/notion2api` on Windows or `$XDG_DATA_HOME/notion2api` (default `~/.local/share/notion2api`) on Linux. Set `NOTION2API_HOME` before running **any** command to use a different isolated state directory; credentials are not copied automatically. Explicit environment variables take precedence over `.env`.
+
+`whoami` describes saved local configuration; it does not verify the remote session, model access or cost. `logout` removes local login/session files, not remote sessions or all conversation databases. See [SECURITY.md](SECURITY.md).
+
 
 ### Basic Prompting & Model Selection
 ```bash
@@ -132,7 +149,7 @@ python ask_notion.py -s "Architecture Decision Record" "Draft ADR for migration 
 
 Start the local server (supports Cherry Studio, Cline, Cursor, Open WebUI):
 ```bash
-python -m uvicorn app.server:app --host 127.0.0.1 --port 8765
+notion-ai-server --host 127.0.0.1 --port 8765
 ```
 Or use the provided launcher:
 ```bash
@@ -166,7 +183,20 @@ notion2api/
 
 ---
 
+## Validation and boundaries
+
+```console
+uv run --locked --extra dev ruff check .
+uv run --locked --extra dev pytest tests/ -q
+uv build --wheel
+uv run --locked --extra dev python scripts/check_distribution.py
+```
+
+CI runs the offline suite, basic source/test lint, wheel-content checks and actual installed-command smoke checks on Windows/Linux with Python 3.10, 3.11 and 3.13. Synthetic fixtures and mocked upstream calls do not establish live Notion access, production readiness or legal compliance. AST validation is a syntax safeguard, not an OS sandbox or correctness guarantee. Outgoing prompts/files require review. Direct workspace publishing additionally requires the separately configured `ntn` CLI.
+
 ## 🤝 Contributing & Community / Katkıda Bulunma
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the locked setup, test isolation and dependency-update procedure.
 
 We welcome contributions from developers worldwide! This project is under active self-evolution:
 

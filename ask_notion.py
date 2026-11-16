@@ -1,24 +1,35 @@
+from __future__ import annotations
+
 import sys
 import os
 import re
 import argparse
 import subprocess
-import shutil
+from typing import TYPE_CHECKING
+
+from app.model_registry import MODEL_MAP, list_available_models, get_display_name
+from app.paths import state_dir
+
+if TYPE_CHECKING:
+    from app.conversation import ConversationManager
 
 # Ensure project root is in sys.path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE_DIR)
+BASE_DIR = str(state_dir())
 
 # Suppress noisy JSON logging on terminal CLI by default
 os.environ.setdefault("NOTION_CLI_MODE", "1")
 
-from app.config import get_default_account
-from app.notion_client import NotionOpusAPI
-from app.conversation import ConversationManager
-from app.model_registry import MODEL_MAP, list_available_models, get_display_name
-from app.patcher import safe_apply_patch, rollback_patch, compute_hash
-from app.agent_loop import run_agent_loop
-from app.task_queue import create_task, list_tasks, run_worker_cycle
+def _load_runtime():
+    """Load account-dependent modules only after offline help/model listing exits."""
+    global get_default_account, NotionOpusAPI, ConversationManager
+    global safe_apply_patch, rollback_patch, compute_hash, run_agent_loop
+    global create_task, list_tasks, run_worker_cycle
+    from app.config import get_default_account
+    from app.notion_client import NotionOpusAPI
+    from app.conversation import ConversationManager
+    from app.patcher import safe_apply_patch, rollback_patch, compute_hash
+    from app.agent_loop import run_agent_loop
+    from app.task_queue import create_task, list_tasks, run_worker_cycle
 
 SESSION_FILE = os.path.join(BASE_DIR, "data", "cli_session.txt")
 
@@ -108,7 +119,7 @@ def save_to_notion(title: str, content: str) -> bool:
             input=md_content,
             capture_output=True,
             text=True,
-            shell=True,
+            shell=False,
             env=env
         )
         if result.returncode == 0:
@@ -131,6 +142,7 @@ def ask_notion(
     save_title: str = None,
     auto_approve: bool = False,
 ):
+    _load_runtime()
     actual_model = resolve_model(model_name)
     try:
         account = get_default_account()
@@ -308,7 +320,7 @@ def show_auth_status() -> int:
     print(f"  Kullanıcı     : {user_name} ({user_email})")
     print(f"  Workspace ID  : {space_id}")
     print(f"  Toplam Profil : {len(accounts)}")
-    print(f"  Durum         : Bağlı ve aktif (Tüm sorgular $0 maliyetle akar)\n")
+    print("  Durum         : Yerel profil kayıtlı; canlı oturum ve ücret durumu doğrulanmadı.\n")
     return 0
 
 def perform_logout() -> int:
@@ -427,6 +439,8 @@ Kullanım:
     if args.list_models:
         print_models()
         sys.exit(0)
+
+    _load_runtime()
 
     if args.rollback:
         success, msg = rollback_patch(args.rollback, auto_approve=args.yes)

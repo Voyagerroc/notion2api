@@ -1,10 +1,12 @@
 import os
 import json
 from dotenv import load_dotenv
+from app.paths import state_dir
 
 # 加载 .env 文件中的环境变量（优先使用项目根目录下的 .env）
-ENV_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
-load_dotenv(ENV_FILE, override=True)
+ENV_FILE = str(state_dir() / ".env")
+# Explicit process configuration takes precedence over the optional local file.
+load_dotenv(ENV_FILE, override=False)
 
 REQUIRED_ACCOUNT_FIELDS = {"token_v2", "space_id", "user_id"}
 
@@ -14,20 +16,20 @@ def load_accounts():
     优先级：accounts.json > NOTION_ACCOUNTS 环境变量
     """
     # 优先从 accounts.json 文件读取
-    accounts_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "accounts.json")
+    accounts_file = str(state_dir() / "accounts.json")
     accounts_json = None
 
     if os.path.exists(accounts_file):
         with open(accounts_file, "r", encoding="utf-8") as f:
             accounts_json = f.read().strip()
-    
+
     # 回退到环境变量
     if not accounts_json:
         accounts_json = os.getenv("NOTION_ACCOUNTS")
 
     if not accounts_json:
         return []
-    
+
     try:
         accounts = json.loads(accounts_json)
         if not isinstance(accounts, list) or len(accounts) == 0:

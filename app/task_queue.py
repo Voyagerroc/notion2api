@@ -9,15 +9,12 @@ import time
 import uuid
 from typing import Any, Dict, Iterator, List, Optional
 from urllib.error import URLError
+from app.paths import state_dir
 
 
 logger = logging.getLogger(__name__)
 
-DB_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "data",
-    "tasks.db",
-)
+DB_PATH = str(state_dir() / "data" / "tasks.db")
 
 # Tüm zaman damgaları Unix zamanı, saniye cinsindedir.
 LEASE_SECONDS = 120
