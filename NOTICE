@@ -1,0 +1,22 @@
+NOTICE
+
+This project is a derivative of notion2api by maverickxone and contributors:
+https://github.com/maverickxone/notion2api
+
+Comparison basis: upstream commit cc7fcf4dc78af245f4ce961c5951384c7b78b005 (2026-10-23).
+Of the 55 file paths present in both repositories, 43 are byte-identical and 12 differ.
+
+Licence of the original work: the upstream repository contains no LICENSE file, but its README
+(final section, line 324) declares "MIT License". The MIT License text in this repository's
+LICENSE file applies, and the original copyright is credited there.
+
+Parts added in this repository (not present upstream): the terminal agent and ReAct loop
+(ask_notion.py, app/agent_loop.py, app/tools.py, app/cli.py), the AST-validated code patcher
+(app/patcher.py), the SQLite task queue (app/task_queue.py), path handling (app/paths.py),
+packaging (pyproject.toml, uv.lock, scripts/check_distribution.py), the test suite (tests/),
+continuous integration and dependency update configuration (.github/), and project documents
+(CONTRIBUTING.md, SECURITY.md, LICENSE).
+
+Parts changed in this repository: README.md, .gitignore, requirements.txt, main.py, login.py,
+app/config.py, app/conversation.py, app/logger.py, app/model_registry.py, app/notion_client.py,
+app/server.py and app/stream_parser.py.
