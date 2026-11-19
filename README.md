@@ -46,6 +46,12 @@
 
 ---
 
+## Origin and credits
+
+This project is a derivative of [maverickxone/notion2api](https://github.com/maverickxone/notion2api). It was compared against upstream commit `cc7fcf4` (2026-10-23): 43 of the 55 file paths the two repositories share are byte-identical, and 12 differ. The upstream README declares the MIT License; upstream has no separate LICENSE file. This repository adds the terminal agent, patcher, task queue, packaging, tests and CI, and modifies the core server and client modules. See [NOTICE](NOTICE) for details.
+
+---
+
 ## 📦 Quick Start / Hızlı Başlangıç
 
 ### 1. Clone the Repository / Depoyu Klonlayın
