@@ -24,6 +24,11 @@ MODEL_MAP: dict[str, str] = {
     "gpt-6-astra": "orlando-quinn",
     # added 2026-10-17 (agent_service runtime; codenames from getAvailableModels)
     "gpt-6.1-sol": "omniberry-sundae",
+    # added 2026-11-19 (codenames from getAvailableModels)
+    "gpt-6.2-sol": "orchard-oncall",
+    "gpt-6.1-terra": "ortinique-oken",
+    "kimi-k3": "baseten-kimi-k3",
+    "grok-4.7": "grok-4.7",
     "gpt-6-luna": "omodi",
     "claude-sonnet5.5": "achira-donut",
     "claude-opus5.5": "albuquerque-quinn",
@@ -65,6 +70,10 @@ DISPLAY_NAMES: dict[str, str] = {
     "gemini-3flash": "Gemini 3 Flash",
     "gpt-6-astra": "GPT-6 Astra",
     "gpt-6.1-sol": "GPT-6.1 Sol",
+    "gpt-6.2-sol": "GPT-6.2 Sol",
+    "gpt-6.1-terra": "GPT-6.1 Terra",
+    "kimi-k3": "Kimi K3",
+    "grok-4.7": "Grok 4.7",
     "gpt-6-luna": "GPT-6 Luna",
     "claude-sonnet5.5": "Sonnet 5.5",
     "claude-opus5.5": "Opus 5.5",

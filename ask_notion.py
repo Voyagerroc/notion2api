@@ -45,6 +45,8 @@ MODEL_ALIASES = {
     "gpt": "gpt-5.5",
     "gpt5": "gpt-5.5",
     "gpt6": "gpt-6.1-sol",
+    "gpt62": "gpt-6.2-sol",
+    "sol": "gpt-6.2-sol",
     "gemini": "gemini-3.5flash",
     "gemini-pro": "gemini-3.1pro",
     "deepseek": "deepseek-v4pro",
