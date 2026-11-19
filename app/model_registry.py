@@ -27,7 +27,6 @@ MODEL_MAP: dict[str, str] = {
     # added 2026-11-19 (codenames from getAvailableModels)
     "gpt-6.2-sol": "orchard-oncall",
     "gpt-6.1-terra": "ortinique-oken",
-    "kimi-k3": "baseten-kimi-k3",
     "grok-4.7": "grok-4.7",
     "gpt-6-luna": "omodi",
     "claude-sonnet5.5": "achira-donut",
@@ -72,7 +71,6 @@ DISPLAY_NAMES: dict[str, str] = {
     "gpt-6.1-sol": "GPT-6.1 Sol",
     "gpt-6.2-sol": "GPT-6.2 Sol",
     "gpt-6.1-terra": "GPT-6.1 Terra",
-    "kimi-k3": "Kimi K3",
     "grok-4.7": "Grok 4.7",
     "gpt-6-luna": "GPT-6 Luna",
     "claude-sonnet5.5": "Sonnet 5.5",
