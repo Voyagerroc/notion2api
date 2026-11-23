@@ -1,7 +1,5 @@
 # Notion2API & Notion AI Terminal Agent
 
-> **Turn Notion AI into an Autonomous CLI Agent & OpenAI-Compatible Local API Bridge.**
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
@@ -9,37 +7,53 @@
 
 ---
 
-## 🌟 Overview / Genel Bakış
+> Use the Notion AI you already have access to from your terminal or from any app that speaks the OpenAI API, through a small bridge that runs on your own computer.
 
-**Notion2API** bridges the Notion AI Web API into two experimental local workflows:
-1. **Autonomous Terminal AI Agent (`ask_notion.py` / `notion-ai`)**: A full-featured terminal development companion equipped with a ReAct tool-calling loop, an AST-validated safe code patcher with instant rollback, a background SQLite task queue with worker leasing, and direct Notion workspace publishing.
-2. **Local OpenAI-Compatible API Server (`app.server:app`)**: Exposes standard `/v1/chat/completions` endpoints for Cursor, Cline, Cherry Studio, Zotero, or any custom LLM client with streaming (SSE), thinking traces, and live web search visibility.
+**Türkçe özet:** Notion2API, kendi Notion hesabınızdaki Notion AI'ı bilgisayarınızda çalışan bir terminal asistanına ve OpenAI uyumlu yerel bir API sunucusuna dönüştüren deneysel bir araçtır. Cursor, Cline veya Cherry Studio gibi uygulamalar bu yerel sunucuya bağlanabilir; terminal aracı ise dosya okuyabilir, güvenli kod yaması önerebilir ve sonuçları Notion sayfanıza kaydedebilir. Resmi bir Notion ürünü değildir ve Notion hesap koşullarınıza tabidir.
+
+**Status:** Experimental pre-release (`0.1.0` in `pyproject.toml`). Offline tests and CI exist; live Notion access is not verified by CI, and this is an unofficial integration, not affiliated with Notion.
 
 ---
 
-## 🚀 Key Features / Öne Çıkan Özellikler
+## What it does
 
-### 1. 🤖 Autonomous ReAct Agent Loop (`-a` / `--agent`)
+- Runs a **local OpenAI-compatible server** (`/v1/chat/completions`, streaming) backed by your own Notion AI session.
+- Ships a **terminal assistant** (`notion-ai`) for one-off questions, questions about local files, and model selection.
+- Offers an **agent mode** that can explore files with confined, read-only tools.
+- Proposes **code edits with review and rollback**: diffs are shown before writing, Python edits are syntax-checked, and backups allow one-command undo.
+- Provides a **background task queue** (SQLite) and can **publish results to a Notion page**.
+- Includes a built-in **browser chat UI** at `http://127.0.0.1:8765`.
+
+## Who it is for
+
+- Developers who already pay for or have access to Notion AI and want to use it inside their editor, scripts or LLM clients.
+- Tinkerers comfortable with a Python CLI, local credentials and an unofficial, best-effort integration. It is not a hosted service and not meant for non-technical end users.
+
+---
+
+## Key features in detail
+
+### 1. Autonomous ReAct agent loop (`-a` / `--agent`)
 - Confined filesystem tools (`read_file`, `read_file_range`, `list_files`, `file_info`).
 - Built-in error fingerprinter that catches repetitive tool failures and prevents endless loops.
 - Model-agnostic XML/JSON tool call parsing with fallback AST evaluation.
 
-### 2. 🛡️ Safe AST Code Patcher & Rollback (`-e` / `--rollback`)
+### 2. Safe code patcher and rollback (`-e` / `--rollback`)
 - Atomic writes via `.tmp` file syncing before swap (`os.replace`).
 - Python syntax tree verification (`ast.parse`) checks Python syntax before replacement; it does not prove semantic correctness or provide an OS sandbox.
 - Automatic SHA-256 validated `.bak` creation with color-coded diff review (`[e/H]` confirmation).
 - 1-command rollback: `notion-ai --rollback target.py`.
 
-### 3. ⚡ Persistent Task Queue & Background Worker (`--queue-add` / `--worker`)
+### 3. Persistent task queue and background worker (`--queue-add` / `--worker`)
 - SQLite-backed state machine with atomic task claiming (`BEGIN IMMEDIATE`).
 - Worker heartbeats, dead worker recovery, and exponential backoff retry.
 - Phased task execution (`execute` → `notion_save`) prevents expensive code re-runs on network timeouts.
 
-### 4. 📝 Direct Notion Workspace Publishing (`-s` / `--save-to-notion`)
-- Save terminal reasoning, agent summaries, or code diff reports directly to your private Notion workspace pages.
-- Native markdown conversion and headless CLI sync.
+### 4. Direct Notion workspace publishing (`-s` / `--save-to-notion`)
+- Save terminal reasoning, agent summaries, or code diff reports to your private Notion workspace pages.
+- Requires the separately configured `ntn` CLI.
 
-### 5. 🌐 Local OpenAI-Compatible Server
+### 5. Local OpenAI-compatible server
 - Model aliases are listed by `notion-ai --list-models`; this is a local mapping, not verification of current account access or provider availability.
 - Multi-account pooling with round-robin rotation and cooldown handling.
 - Streaming reasoning (`thinking`) and live web search traces.
@@ -103,10 +117,10 @@ A source/editable checkout keeps its existing `.env`, `accounts.json` and `data/
 
 ### Basic Prompting & Model Selection
 ```bash
-# Ask using the default smart model
+# Ask using the default model (auto)
 python ask_notion.py "Explain quantum computing in 3 bullets"
 
-# Select specific model (sonnet, opus, gpt, gemini, auto)
+# Select a specific model (auto, sonnet, opus, gpt, gemini, kimi); see --list-models
 python ask_notion.py -m sonnet "Write a Python script for exponential backoff"
 ```
 
@@ -153,7 +167,7 @@ python ask_notion.py -s "Architecture Decision Record" "Draft ADR for migration 
 
 ## 🖥️ Running the OpenAI-Compatible API Server
 
-Start the local server (supports Cherry Studio, Cline, Cursor, Open WebUI):
+Start the local server (for OpenAI-compatible clients such as Cherry Studio, Cline, Cursor, Open WebUI):
 ```bash
 notion-ai-server --host 127.0.0.1 --port 8765
 ```
@@ -173,18 +187,27 @@ Open your browser at `http://127.0.0.1:8765` for the built-in dark-mode chat int
 ```
 notion2api/
 ├── app/
-│   ├── agent_loop.py      # Autonomous ReAct loop with loop breaking & error fingerprinting
-│   ├── patcher.py         # Safe AST-validated atomic patcher with SHA-256 rollback
-│   ├── task_queue.py      # SQLite persistent queue with worker leases & heartbeat
-│   ├── tools.py           # Confined filesystem tools (read, list, slice)
-│   ├── notion_client.py   # Notion AI reverse-engineered client & TLS impersonation
-│   ├── conversation.py    # Sliding window conversation manager
 │   ├── server.py          # FastAPI OpenAI-compatible API server
-│   └── config.py          # Environment & account rotation configuration
-├── ask_notion.py          # Unified CLI entrypoint (agent, worker, patcher, chat)
-├── login.py               # Chrome-based Notion credential extractor
-├── Baslat-Notion-AI.bat   # Windows one-click server & UI starter
-└── requirements.txt       # Python dependencies
+│   ├── cli.py             # notion-ai-server entry point
+│   ├── notion_client.py   # Unofficial Notion AI web client
+│   ├── stream_parser.py   # Streaming response parsing
+│   ├── conversation.py    # Conversation manager
+│   ├── account_pool.py    # Multi-account rotation and cooldown
+│   ├── model_registry.py  # Model alias mapping
+│   ├── agent_loop.py      # ReAct agent loop
+│   ├── tools.py           # Confined filesystem tools
+│   ├── patcher.py         # Syntax-checked atomic patcher with rollback
+│   ├── task_queue.py      # SQLite task queue with worker leases
+│   └── config.py, paths.py, ...
+├── frontend/              # Built-in browser chat UI
+├── tests/                 # Offline pytest suite
+├── scripts/               # Distribution check, deploy/manage helper scripts
+├── docs/                  # Progress notes, model-adding guide
+├── ask_notion.py          # CLI entry point (notion-ai / voyager-relay)
+├── login.py               # Local Notion login / credential capture
+├── Baslat-Notion-AI.bat   # Windows one-click server + UI starter
+├── Dockerfile, docker-compose.yml
+└── pyproject.toml, requirements.txt, uv.lock
 ```
 
 ---
@@ -204,8 +227,6 @@ CI runs the offline suite, basic source/test lint, wheel-content checks and actu
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) for the locked setup, test isolation and dependency-update procedure.
 
-We welcome contributions from developers worldwide! This project is under active self-evolution:
-
 - **Issues & Discussions**: Check the [Issues Tab](https://github.com/Voyagerroc/notion2api/issues) for open roadmaps and RFCs.
 - **Pull Requests**:
   1. Fork the repository.
@@ -218,7 +239,7 @@ We welcome contributions from developers worldwide! This project is under active
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) and [NOTICE](NOTICE) (upstream credit). Security notes: [SECURITY.md](SECURITY.md).
 
 ---
 
