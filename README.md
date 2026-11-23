@@ -117,10 +117,10 @@ A source/editable checkout keeps its existing `.env`, `accounts.json` and `data/
 
 ### Basic Prompting & Model Selection
 ```bash
-# Ask using the default smart model
+# Ask using the default model (auto)
 python ask_notion.py "Explain quantum computing in 3 bullets"
 
-# Select specific model (sonnet, opus, gpt, gemini, auto)
+# Select a specific model (auto, sonnet, opus, gpt, gemini, kimi); see --list-models
 python ask_notion.py -m sonnet "Write a Python script for exponential backoff"
 ```
 
@@ -201,7 +201,7 @@ notion2api/
 │   └── config.py, paths.py, ...
 ├── frontend/              # Built-in browser chat UI
 ├── tests/                 # Offline pytest suite
-├── scripts/               # Distribution checks
+├── scripts/               # Distribution check, deploy/manage helper scripts
 ├── docs/                  # Progress notes, model-adding guide
 ├── ask_notion.py          # CLI entry point (notion-ai / voyager-relay)
 ├── login.py               # Local Notion login / credential capture
